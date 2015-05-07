@@ -1,6 +1,6 @@
 {
   "name": "auth-rbac",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "RBAC-based authorization library for ExpressJS",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,9 @@
     "auth",
     "rbac",
     "authorization",
-    "authentication"
+    "authentication",
+    "middleware",
+    "express"
   ],
   "author": "Alejandro Caravaca Puchades <alex94puchades@gmail.com>",
   "license": "MIT",
