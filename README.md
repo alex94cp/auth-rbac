@@ -1,2 +1,2 @@
 # auth-rbac
-An authentication/authorization library that implements RBAC for node.js
+RBAC-based authorization library for node.js
