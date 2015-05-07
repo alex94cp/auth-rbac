@@ -28,3 +28,7 @@ module.exports = rbac({
 		cb(err, hasPriv);
 	}
 });
+
+function AuthTest(user) {
+	
+};
