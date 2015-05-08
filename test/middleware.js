@@ -1,16 +1,25 @@
-var rbac = require('../');
 var auth = require('./common');
-var assert = require('assert');
+var should = require('should');
+
+var rbac = require('../');
+rbac.User = require('../lib/user');
+rbac.Role = require('../lib/role');
+
+var authCallback = rbac.authenticate(auth, {
+	credentialsGiven: function(req) {
+		return true;
+	},
+	
+	extractCredentials: function(req) {
+		return { user: 'guest', pass: '1234' };
+	}
+});
 
 describe('authenticate', function() {
-	var authCallback = null;
 	var user = null;
 	var role = null;
 	
 	before(function(done) {
-		authCallback = rbac.authenticate(auth, function(req) {
-			return { user: 'guest' };
-		});
 		auth.authenticateUser({ user: 'guest' }, function(err, guestUser) {
 			if (err)
 				return done(err);
@@ -26,10 +35,11 @@ describe('authenticate', function() {
 	
 	it('should return a function that adds req.auth', function(done) {
 		var req = {};
-		authCallback(req, {}, function(){
-			assert('auth' in req);
-			assert.deepEqual(req.auth.user, user);
-			assert.deepEqual(req.auth.role, role);
+		authCallback(req, {}, function() {
+			req.should.have.property('auth');
+			req.auth.should.have.properties(['user', 'role']);
+			req.auth.user.should.be.an.instanceof(rbac.User);
+			req.auth.role.should.be.an.instanceof(rbac.Role);
 			done();
 		});
 	});
@@ -42,14 +52,10 @@ describe('authenticate', function() {
 });
 
 describe('requirePrivilege', function() {
-	var authCallback = null;
 	var user = null;
 	var role = null;
 	
 	before(function(done) {
-		authCallback = rbac.authenticate(auth, function(req) {
-			return { user: 'guest' };
-		});
 		auth.authenticateUser({ user: 'guest' }, function(err, guestUser) {
 			if (err)
 				return done(err);

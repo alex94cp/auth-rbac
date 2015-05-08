@@ -13,22 +13,17 @@ var authInfo = {
 
 module.exports = rbac({
 	authenticateUser: function(creds, cb) {
-		var err = null;
 		var user = authInfo.userRoles[creds.user] ? creds.user : null;
-		cb(err, user);
+		cb(null, user);
 	},
+	
 	userGetRole: function(user, cb) {
-		var err = null;
 		var role = authInfo.userRoles[user]
-		cb(err, role);
+		cb(null, role);
 	},
+	
 	roleHasPrivilege: function(role, priv, cb) {
-		var err = null;
 		var hasPriv = authInfo.rolePrivileges[role].indexOf(priv) != -1
-		cb(err, hasPriv);
+		cb(null, hasPriv);
 	}
 });
-
-function AuthTest(user) {
-	
-};

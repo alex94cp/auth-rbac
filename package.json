@@ -20,7 +20,8 @@
   ],
   "author": "Alejandro Caravaca Puchades <alex94puchades@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-    "mocha": "~2.2.4"
+  "devDependencies": {
+    "mocha": "~2.2.4",
+    "should": "~6.0.1"
   }
 }

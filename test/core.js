@@ -1,5 +1,5 @@
 var auth = require('./common');
-var assert = require('assert');
+var should = require('should');
 
 describe('Auth', function() {
 	describe('#authenticateUser', function() {
@@ -7,7 +7,7 @@ describe('Auth', function() {
 			auth.authenticateUser({ user: 'admin' }, function(err, user) {
 				if (err)
 					return done(err);
-				assert(user);
+				user.should.be.ok;
 				done();
 			});
 		});
@@ -16,7 +16,7 @@ describe('Auth', function() {
 			auth.authenticateUser({ user: 'invalid' }, function(err, user) {
 				if (err)
 					return done(err);
-				assert(!user);
+				(user === null).should.be.true;
 				done();
 			});
 		});
@@ -40,7 +40,7 @@ describe('User', function() {
 			user.getRole(function(err, role) {
 				if (err)
 					return done(err);
-				assert(role);
+				role.should.be.ok;
 				done();
 			});
 		});
@@ -70,7 +70,7 @@ describe('Role', function() {
 			role.hasPrivilege('file-read', function(err, canReadFile) {
 				if (err)
 					return done(err);
-				assert(canReadFile);
+				canReadFile.should.be.true;
 				done();
 			});
 		});
@@ -79,7 +79,7 @@ describe('Role', function() {
 			role.hasPrivilege('file-write', function(err, canWriteFile) {
 				if (err)
 					return done(err);
-				assert(!canWriteFile);
+				canWriteFile.should.be.false;
 				done();
 			});
 		});
