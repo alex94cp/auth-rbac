@@ -1,5 +1,6 @@
 var auth = require('./common');
 var should = require('should');
+var httpMocks = require('node-mocks-http');
 
 var rbac = require('../');
 rbac.User = require('../lib/user');
@@ -34,8 +35,9 @@ describe('authenticate', function() {
 	});
 	
 	it('should return a function that adds req.auth', function(done) {
-		var req = {};
-		authCallback(req, {}, function() {
+		var req = httpMocks.createRequest();
+		var res = httpMocks.createResponse();
+		authCallback(req, res, function() {
 			req.should.have.property('auth');
 			req.auth.should.have.properties(['user', 'role']);
 			req.auth.user.should.be.an.instanceof(rbac.User);
@@ -45,7 +47,9 @@ describe('authenticate', function() {
 	});
 	
 	it('should return a function that calls next', function(done) {
-		authCallback({}, {}, function() {
+		var req = httpMocks.createRequest();
+		var res = httpMocks.createResponse();
+		authCallback(req, res, function() {
 			done();
 		});
 	});
@@ -69,10 +73,13 @@ describe('requirePrivilege', function() {
 		});
 	});
 	
-	var req = {};
+	var req = null;
+	var res = null;
 	
 	beforeEach(function(done) {
-		authCallback(req, {}, done);
+		req = httpMocks.createRequest();
+		res = httpMocks.createResponse();
+		authCallback(req, res, done);
 	});
 	
 	it('should call onAccessGranted if role has privilege', function(done) {
@@ -80,7 +87,7 @@ describe('requirePrivilege', function() {
 			onAccessGranted: function(req, res) {
 				done();
 			}
-		})(req, {});
+		})(req, res);
 	});
 	
 	it('should call onAccessDenied otherwise', function(done) {
@@ -88,6 +95,6 @@ describe('requirePrivilege', function() {
 			onAccessDenied: function(req, res) {
 				done();
 			}
-		})(req, {});
+		})(req, res);
 	});
 });
