@@ -32,7 +32,7 @@ app.use(rbac.httpBasic(auth, 'example'));
 
 app.get('/resources', rbac.requirePrivilege(auth, 'resource-list', function(req, res) {
 	res.send('Access granted');
-});
+}));
 ```
 
 **Note:** At this moment, some of the plugins are not finished (yet), so you can use the [raw interface](#raw-interface-for-plugin-developers) instead.
@@ -77,5 +77,5 @@ app.use(rbac.authenticate({
 	askForCredentials: function(res) {
 		// ask for credentials, ie: res.sendStatus(401)
 	}
-});
+}));
 ```
