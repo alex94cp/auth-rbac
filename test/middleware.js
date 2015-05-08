@@ -82,11 +82,25 @@ describe('requirePrivilege', function() {
 		authCallback(req, res, done);
 	});
 	
-	it('should call onAccessGranted if role has privilege', function(done) {
+	it('should call onAccessGranted if access is granted', function(done) {
 		rbac.requirePrivilege('file-read', {
 			onAccessGranted: function(req, res) {
 				done();
 			}
+		})(req, res);
+	});
+	
+	it('should accept a function to evaluate required privileges at request time', function(done) {
+		rbac.requirePrivilege(function(req) { return 'file-read'; }, {
+			onAccessGranted: function(req, res) {
+				done();
+			}
+		})(req, res);
+	});
+	
+	it('should also accept a function to call if access is granted', function(done) {
+		rbac.requirePrivilege('file-read', function(req, res) {
+			done();
 		})(req, res);
 	});
 	
