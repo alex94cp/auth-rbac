@@ -30,10 +30,8 @@ var app = express();
 
 app.use(rbac.httpBasic(auth, 'example'));
 
-app.get('/resource', rbac.requirePrivilege(auth, 'resource-get', {
-	onAccessGranted: function(req, res) {
-		res.send('Access granted');
-	}
+app.get('/resources', rbac.requirePrivilege(auth, 'resource-list', function(req, res) {
+	res.send('Access granted');
 });
 ```
 
