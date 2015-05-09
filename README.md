@@ -55,7 +55,7 @@ var auth = rbac({
 	},
 	
 	userGetRole: function(user, cb) {
-		// return user role
+		// return user role info or null
 	},
 	
 	roleHasPrivilege: function(role, priv, cb) {
@@ -65,13 +65,9 @@ var auth = rbac({
 ```
 
 ```js
-app.use(rbac.authenticate({
-	credentialsGiven: function(req) {
-		// return whether request contains credentials
-	},
-	
+app.use(rbac.authenticate(auth, {
 	extractCredentials: function(req) {
-		// return credentials in request
+		// return credentials in request or null
 	},
 	
 	askForCredentials: function(res) {

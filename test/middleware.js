@@ -16,6 +16,13 @@ var authCallback = rbac.authenticate(auth, {
 	}
 });
 
+function checkRequestAuthInfo(req) {
+	req.should.have.property('auth');
+	req.auth.should.have.properties(['user', 'role']);
+	req.auth.user.should.be.an.instanceof(rbac.User);
+	req.auth.role.should.be.an.instanceof(rbac.Role);
+}
+
 describe('authenticate', function() {
 	var user = null;
 	var role = null;
@@ -29,7 +36,7 @@ describe('authenticate', function() {
 				if (err)
 					return done(err);
 				role = guestRole;
-				done();
+				return done();
 			});
 		});
 	});
@@ -37,20 +44,21 @@ describe('authenticate', function() {
 	it('should return a function that adds req.auth', function(done) {
 		var req = httpMocks.createRequest();
 		var res = httpMocks.createResponse();
-		authCallback(req, res, function() {
-			req.should.have.property('auth');
-			req.auth.should.have.properties(['user', 'role']);
-			req.auth.user.should.be.an.instanceof(rbac.User);
-			req.auth.role.should.be.an.instanceof(rbac.Role);
-			done();
+		authCallback(req, res, function(err) {
+			if (err)
+				return done(err);
+			checkRequestAuthInfo(req);
+			return done();
 		});
 	});
 	
 	it('should return a function that calls next', function(done) {
 		var req = httpMocks.createRequest();
 		var res = httpMocks.createResponse();
-		authCallback(req, res, function() {
-			done();
+		authCallback(req, res, function(err) {
+			if (err)
+				return done(err);
+			return done();
 		});
 	});
 });
@@ -68,7 +76,7 @@ describe('requirePrivilege', function() {
 				if (err)
 					return done(err);
 				role = guestRole;
-				done();
+				return done();
 			});
 		});
 	});
@@ -85,7 +93,7 @@ describe('requirePrivilege', function() {
 	it('should call onAccessGranted if access is granted', function(done) {
 		rbac.requirePrivilege('file-read', {
 			onAccessGranted: function(req, res) {
-				done();
+				return done();
 			}
 		})(req, res);
 	});
@@ -93,21 +101,21 @@ describe('requirePrivilege', function() {
 	it('should accept a function to evaluate required privileges at request time', function(done) {
 		rbac.requirePrivilege(function(req) { return 'file-read'; }, {
 			onAccessGranted: function(req, res) {
-				done();
+				return done();
 			}
 		})(req, res);
 	});
 	
 	it('should also accept a function to call if access is granted', function(done) {
 		rbac.requirePrivilege('file-read', function(req, res) {
-			done();
+			return done();
 		})(req, res);
 	});
 	
 	it('should call onAccessDenied otherwise', function(done) {
 		rbac.requirePrivilege('file-write', {
 			onAccessDenied: function(req, res) {
-				done();
+				return done();
 			}
 		})(req, res);
 	});
