@@ -11,7 +11,7 @@ describe('Auth', function() {
 				done();
 			});
 		});
-		
+
 		it('should invoke callback with null otherwise', function(done) {
 			auth.authenticateUser({ user: 'invalid' }, function(err, user) {
 				if (err)
@@ -24,8 +24,7 @@ describe('Auth', function() {
 });
 
 describe('User', function() {
-	var user = null;
-	
+	var user;
 	before(function(done) {
 		auth.authenticateUser({ user: 'admin' }, function(err, adminUser) {
 			if (err)
@@ -34,7 +33,7 @@ describe('User', function() {
 			done();
 		});
 	});
-	
+
 	describe('#getRole', function() {
 		it('should invoke callback with user role', function(done) {
 			user.getRole(function(err, role) {
@@ -48,9 +47,7 @@ describe('User', function() {
 });
 
 describe('Role', function() {
-	var user = null;
-	var role = null;
-	
+	var user, role;
 	before(function(done) {
 		auth.authenticateUser({ user: 'guest' }, function(err, guestUser) {
 			if (err)
@@ -64,7 +61,7 @@ describe('Role', function() {
 			});
 		});
 	});
-	
+
 	describe('#hasPrivilege', function() {
 		it('should invoke callback with true if role has privilege', function(done) {
 			role.hasPrivilege('file-read', function(err, canReadFile) {
@@ -74,7 +71,7 @@ describe('Role', function() {
 				done();
 			});
 		});
-		
+
 		it('should return false otherwise', function(done) {
 			role.hasPrivilege('file-write', function(err, canWriteFile) {
 				if (err)

@@ -1,4 +1,4 @@
-var rbac = require('../');
+var authRbac = require('../');
 
 var authInfo = {
 	userRoles: {
@@ -11,17 +11,17 @@ var authInfo = {
 	}
 };
 
-module.exports = rbac({
+module.exports = authRbac({
 	authenticateUser: function(creds, cb) {
 		var user = authInfo.userRoles[creds.user] ? creds.user : null;
 		cb(null, user);
 	},
-	
+
 	userGetRole: function(user, cb) {
 		var role = authInfo.userRoles[user]
 		cb(null, role);
 	},
-	
+
 	roleHasPrivilege: function(role, priv, cb) {
 		var hasPriv = authInfo.rolePrivileges[role].indexOf(priv) != -1
 		cb(null, hasPriv);

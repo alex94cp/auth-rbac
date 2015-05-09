@@ -2,15 +2,15 @@ var auth = require('./common');
 var should = require('should');
 var httpMocks = require('node-mocks-http');
 
-var rbac = require('../');
-rbac.User = require('../lib/user');
-rbac.Role = require('../lib/role');
+var authRbac = require('../');
+authRbac.User = require('../lib/user');
+authRbac.Role = require('../lib/role');
 
-var authCallback = rbac.authenticate(auth, {
+var authCallback = authRbac.authenticate(auth, {
 	credentialsGiven: function(req) {
 		return true;
 	},
-	
+
 	extractCredentials: function(req) {
 		return { user: 'guest', pass: '1234' };
 	}
@@ -19,14 +19,12 @@ var authCallback = rbac.authenticate(auth, {
 function checkRequestAuthInfo(req) {
 	req.should.have.property('auth');
 	req.auth.should.have.properties(['user', 'role']);
-	req.auth.user.should.be.an.instanceof(rbac.User);
-	req.auth.role.should.be.an.instanceof(rbac.Role);
+	req.auth.user.should.be.an.instanceof(authRbac.User);
+	req.auth.role.should.be.an.instanceof(authRbac.Role);
 }
 
 describe('authenticate', function() {
-	var user = null;
-	var role = null;
-	
+	var user, role;
 	before(function(done) {
 		auth.authenticateUser({ user: 'guest' }, function(err, guestUser) {
 			if (err)
@@ -40,7 +38,7 @@ describe('authenticate', function() {
 			});
 		});
 	});
-	
+
 	it('should return a function that adds req.auth', function(done) {
 		var req = httpMocks.createRequest();
 		var res = httpMocks.createResponse();
@@ -51,7 +49,7 @@ describe('authenticate', function() {
 			return done();
 		});
 	});
-	
+
 	it('should return a function that calls next', function(done) {
 		var req = httpMocks.createRequest();
 		var res = httpMocks.createResponse();
@@ -64,9 +62,7 @@ describe('authenticate', function() {
 });
 
 describe('requirePrivilege', function() {
-	var user = null;
-	var role = null;
-	
+	var user, role;
 	before(function(done) {
 		auth.authenticateUser({ user: 'guest' }, function(err, guestUser) {
 			if (err)
@@ -80,40 +76,40 @@ describe('requirePrivilege', function() {
 			});
 		});
 	});
-	
+
 	var req = null;
 	var res = null;
-	
+
 	beforeEach(function(done) {
 		req = httpMocks.createRequest();
 		res = httpMocks.createResponse();
 		authCallback(req, res, done);
 	});
-	
+
 	it('should call onAccessGranted if access is granted', function(done) {
-		rbac.requirePrivilege('file-read', {
+		authRbac.requirePrivilege('file-read', {
 			onAccessGranted: function(req, res) {
 				return done();
 			}
 		})(req, res);
 	});
-	
+
 	it('should accept a function to evaluate required privileges at request time', function(done) {
-		rbac.requirePrivilege(function(req) { return 'file-read'; }, {
+		authRbac.requirePrivilege(function(req) { return 'file-read'; }, {
 			onAccessGranted: function(req, res) {
 				return done();
 			}
 		})(req, res);
 	});
-	
+
 	it('should also accept a function to call if access is granted', function(done) {
-		rbac.requirePrivilege('file-read', function(req, res) {
+		authRbac.requirePrivilege('file-read', function(req, res) {
 			return done();
 		})(req, res);
 	});
-	
+
 	it('should call onAccessDenied otherwise', function(done) {
-		rbac.requirePrivilege('file-write', {
+		authRbac.requirePrivilege('file-write', {
 			onAccessDenied: function(req, res) {
 				return done();
 			}
