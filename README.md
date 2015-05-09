@@ -20,10 +20,10 @@ authRbac.httpBasic = require('auth-rbac-http-basic');
 var User = require('./models/users');
 var Group = require('./models/groups');
 
-var credRoute = authRbac.mongoose.start({ name: String, pass: String });
-var userRoute = credRoute.field('user').rel('link', 'name').gives(User);
-var roleRoute = userRoute.field('group_id').rel('dbref').gives(Group);
-var privRoute = roleRoute.field('privs').rel('field').gives([String]);
+var credRoute = new authRbac.mongoose.Route({ name: String, pass: String });
+var userRoute = credRoute.field('user').linkWith('name').gives(User);
+var roleRoute = userRoute.field('group_id').dbref.gives(Group);
+var privRoute = roleRoute.field('privs').gives([String]);
 var auth = authRbac.mongoose(userRoute, roleRoute, privRoute);
 
 var express = require('express');
