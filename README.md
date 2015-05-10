@@ -3,6 +3,7 @@
 RBAC-based authorization library for [node](http://nodejs.org/)
 
 [![Build Status](https://travis-ci.org/alex94puchades/auth-rbac.svg?branch=master)](https://travis-ci.org/alex94puchades/auth-rbac)
+[![Dependencies](https://david-dm.org/alex94puchades/auth-rbac.svg)](https://david-dm.org/alex94puchades/auth-rbac)
 
 ## Installation
 
