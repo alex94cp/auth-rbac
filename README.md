@@ -36,14 +36,12 @@ app.get('/resources', authRbac.requirePrivilege(auth, 'resource-list', function(
 }));
 ```
 
-**Note:** At this moment, some of the plugins are not finished (yet), so you can use the [raw interface](#raw-interface-for-plugin-developers) instead.
-
 ## Tips
 
 For a better experience, you should make use of auth-rbac plugins, such as:
 
 * [auth-rbac-http-basic](https://github.com/alex94puchades/auth-rbac-http-auth)
-* [auth-rbac-mongoose](https://github.com/alex94puchades/auth-rbac-mongoose) (not available yet)
+* [auth-rbac-mongoose](https://github.com/alex94puchades/auth-rbac-mongoose)
 
 You are enticed to contribute with your own plugins. If you do so, make me know so that I can list it here with the others.
 
