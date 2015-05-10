@@ -7,9 +7,9 @@ describe('Auth', function() {
 			auth.authenticateUser({ user: 'admin' }, function(err, user) {
 				if (err)
 					return done(err);
-				(user !== null).should.be.true;
+				(!!user).should.be.true;
 				user.should.have.property('info', 'admin');
-				done();
+				return done();
 			});
 		});
 
@@ -17,8 +17,8 @@ describe('Auth', function() {
 			auth.authenticateUser({ user: 'invalid' }, function(err, user) {
 				if (err)
 					return done(err);
-				(user === null).should.be.true;
-				done();
+				(!!user).should.be.false;
+				return done();
 			});
 		});
 	});
@@ -31,7 +31,7 @@ describe('User', function() {
 			if (err)
 				return done(err);
 			user = adminUser;
-			done();
+			return done();
 		});
 	});
 
@@ -40,9 +40,9 @@ describe('User', function() {
 			user.getRole(function(err, role) {
 				if (err)
 					return done(err);
-				(role !== null).should.be.true;
+				(!!role).should.be.true;
 				role.should.have.property('info', 'admin_r');
-				done();
+				return done();
 			});
 		});
 	});
@@ -59,7 +59,7 @@ describe('Role', function() {
 				if (err)
 					return done(err);
 				role = guestRole;
-				done();
+				return done();
 			});
 		});
 	});
@@ -70,7 +70,7 @@ describe('Role', function() {
 				if (err)
 					return done(err);
 				canReadFile.should.be.true;
-				done();
+				return done();
 			});
 		});
 
@@ -79,7 +79,7 @@ describe('Role', function() {
 				if (err)
 					return done(err);
 				canWriteFile.should.be.false;
-				done();
+				return done();
 			});
 		});
 	});
