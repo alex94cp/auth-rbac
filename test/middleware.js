@@ -19,8 +19,10 @@ var authCallback = authRbac.authenticate(auth, {
 function checkRequestAuthInfo(req) {
 	req.should.have.property('auth');
 	req.auth.should.have.properties(['user', 'role']);
-	req.auth.user.should.be.an.instanceof(authRbac.User);
-	req.auth.role.should.be.an.instanceof(authRbac.Role);
+	req.auth.user.should.be.an.instanceof(authRbac.User)
+	             .and.have.property('info', 'guest');
+	req.auth.role.should.be.an.instanceof(authRbac.Role)
+	             .and.have.property('info', 'guest_r');
 }
 
 describe('authenticate', function() {
@@ -94,7 +96,7 @@ describe('requirePrivilege', function() {
 		})(req, res);
 	});
 
-	it('should accept a function to evaluate required privileges at request time', function(done) {
+	it('should accept a function to evaluate required privilege at request time', function(done) {
 		authRbac.requirePrivilege(function(req) { return 'file-read'; }, {
 			onAccessGranted: function(req, res) {
 				return done();

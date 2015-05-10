@@ -7,7 +7,8 @@ describe('Auth', function() {
 			auth.authenticateUser({ user: 'admin' }, function(err, user) {
 				if (err)
 					return done(err);
-				user.should.be.ok;
+				(user !== null).should.be.true;
+				user.should.have.property('info', 'admin');
 				done();
 			});
 		});
@@ -39,7 +40,8 @@ describe('User', function() {
 			user.getRole(function(err, role) {
 				if (err)
 					return done(err);
-				role.should.be.ok;
+				(role !== null).should.be.true;
+				role.should.have.property('info', 'admin_r');
 				done();
 			});
 		});
