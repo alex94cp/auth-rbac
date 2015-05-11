@@ -23,17 +23,19 @@ var Group = require('./models/groups');
 
 var Route = authRbac.mongoose.Route;
 var credRoute = new Route({ name: String, pass: String });
-var userRoute = Route.newFrom(credRoute).field('user').linkWith('name').gives(User);
-var roleRoute = Route.newFrom(userRoute).field('group_id').dbRef.gives(Group);
-var privRoute = Route.newFrom(roleRoute).field('privs').gives([String]);
+var userRoute = credRoute.field('user').linkWith('name').gives(User);
+var roleRoute = userRoute.field('group_id').dbRef.gives(Group);
+var privRoute = roleRoute.field('privs').gives([String]);
 var auth = authRbac.mongoose(userRoute, roleRoute, privRoute);
 
 var express = require('express');
 var app = express();
 
 app.use(authRbac.httpBasic(auth, 'example'));
-app.get('/resources', authRbac.requirePrivilege(auth, 'resource-list', function(req, res) {
-	res.send('Access granted');
+app.get('/resources', authRbac.requirePrivilege(auth, 'resource-list', {
+	onAccessGranted: function(req, res) {
+		res.send('Access granted');
+	}
 }));
 ```
 
