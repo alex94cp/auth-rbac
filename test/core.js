@@ -1,5 +1,6 @@
 var auth = require('./common');
-var should = require('should');
+var chai = require('chai');
+var expect = chai.expect;
 
 describe('Auth', function() {
 	describe('#authenticateUser', function() {
@@ -7,8 +8,7 @@ describe('Auth', function() {
 			auth.authenticateUser({ user: 'admin' }, function(err, user) {
 				if (err)
 					return done(err);
-				(!!user).should.be.true;
-				user.should.have.property('info', 'admin');
+				expect(user).to.exist.and.have.property('info', 'admin');
 				return done();
 			});
 		});
@@ -17,7 +17,7 @@ describe('Auth', function() {
 			auth.authenticateUser({ user: 'invalid' }, function(err, user) {
 				if (err)
 					return done(err);
-				(!!user).should.be.false;
+				expect(user).to.not.exist;
 				return done();
 			});
 		});
@@ -40,8 +40,7 @@ describe('User', function() {
 			user.getRole(function(err, role) {
 				if (err)
 					return done(err);
-				(!!role).should.be.true;
-				role.should.have.property('info', 'admin_r');
+				expect(role).to.exist.and.have.property('info', 'admin_r');
 				return done();
 			});
 		});
@@ -69,7 +68,7 @@ describe('Role', function() {
 			role.hasPrivilege('file-read', function(err, canReadFile) {
 				if (err)
 					return done(err);
-				canReadFile.should.be.true;
+				expect(canReadFile).to.be.true;
 				return done();
 			});
 		});
@@ -78,7 +77,7 @@ describe('Role', function() {
 			role.hasPrivilege('file-write', function(err, canWriteFile) {
 				if (err)
 					return done(err);
-				canWriteFile.should.be.false;
+				expect(canWriteFile).to.be.false;
 				return done();
 			});
 		});

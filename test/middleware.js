@@ -1,10 +1,11 @@
 var auth = require('./common');
-var should = require('should');
-var httpMocks = require('node-mocks-http');
-
 var authRbac = require('../');
 authRbac.User = require('../lib/user');
 authRbac.Role = require('../lib/role');
+
+var chai = require('chai');
+var expect = chai.expect;
+var httpMocks = require('node-mocks-http');
 
 var authCallback = authRbac.authenticate(auth, {
 	credentialsGiven: function(req) {
@@ -17,12 +18,12 @@ var authCallback = authRbac.authenticate(auth, {
 });
 
 function checkRequestAuthInfo(req) {
-	req.should.have.property('auth');
-	req.auth.should.have.properties(['user', 'role']);
-	req.auth.user.should.be.an.instanceof(authRbac.User)
-	             .and.have.property('info', 'guest');
-	req.auth.role.should.be.an.instanceof(authRbac.Role)
-	             .and.have.property('info', 'guest_r');
+	expect(req).to.have.deep.property('auth.user')
+	           .that.is.an.instanceof(authRbac.User)
+	           .and.has.property('info', 'guest');
+	expect(req).to.have.deep.property('auth.role')
+	           .that.is.an.instanceof(authRbac.Role)
+	           .and.has.property('info', 'guest_r');
 }
 
 describe('authenticate', function() {
