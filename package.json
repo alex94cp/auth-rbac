@@ -1,6 +1,6 @@
 {
   "name": "auth-rbac",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "RBAC-based authorization library for node",
   "main": "index.js",
   "scripts": {
@@ -25,8 +25,7 @@
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",
     "istanbul": "^0.3.14",
-    "mocha": "~2.2.4",
-    "mocha-lcov-reporter": "0.0.2",
+    "mocha": "~2.2.5",
     "node-mocks-http": "~1.4.2"
   }
 }
