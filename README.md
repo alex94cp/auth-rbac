@@ -33,7 +33,8 @@ var auth = authRbac.mongoose(userRoute, roleRoute, privRoute);
 var express = require('express');
 var app = express();
 
-app.use(authRbac.httpBasic(auth, 'example'));
+var httpBasic = authRbac.httpBasic('example');
+app.use(authRbac.authenticate(auth, httpBasic));
 app.get('/resources', authRbac.requirePrivilege(auth, 'resource-list', {
 	onAccessGranted: function(req, res) {
 		res.send('Access granted');

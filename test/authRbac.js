@@ -16,6 +16,10 @@ var roleHasPrivilege = sinon.stub();
 var extractCredentials = sinon.stub();
 var askForCredentials = sinon.stub();
 
+function noErrorCallback(err) {
+	expect(err).to.not.exist;
+}
+
 describe('authRbac', function() {
 	var auth;
 	beforeEach(function() {
@@ -109,21 +113,18 @@ describe('authRbac', function() {
 	});
 
 	describe('requirePrivilege', function() {
-		var req, res;
+		var req, res, authCallback;
 		beforeEach(function() {
 			roleHasPrivilege.reset();
 			extractCredentials.returns({ user: 'user-id' });
 			authenticateUser.callsArgWith(1, null, 'user-info');
 			userGetRole.callsArgWith(1, null, 'role-info');
-			var authCallback = authRbac.authenticate(auth, {
+			authCallback = authRbac.authenticate(auth, {
 				extractCredentials: extractCredentials,
 				askForCredentials: askForCredentials
 			});
 			req = httpMocks.createRequest();
 			res = httpMocks.createResponse();
-			authCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
 		});
 
 		it('invokes onAccessGranted if access allowed', function() {
@@ -134,9 +135,8 @@ describe('authRbac', function() {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
-			requirePrivCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
+			authCallback(req, res, noErrorCallback);
+			requirePrivCallback(req, res, noErrorCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(grantedCallback).to.have.been.called;
 			expect(deniedCallback).to.not.have.been.called;
@@ -149,9 +149,8 @@ describe('authRbac', function() {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
-			requirePrivCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
+			authCallback(req, res, noErrorCallback);
+			requirePrivCallback(req, res, noErrorCallback);
 			expect(roleHasPrivilege).to.not.have.been.called;
 			expect(grantedCallback).to.have.been.called;
 			expect(deniedCallback).to.not.have.been.called;
@@ -165,10 +164,21 @@ describe('authRbac', function() {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
-			requirePrivCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
+			authCallback(req, res, noErrorCallback);
+			requirePrivCallback(req, res, noErrorCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			expect(grantedCallback).to.not.have.been.called;
+			expect(deniedCallback).to.have.been.called;
+		});
+
+		it('also denies access if req.auth not set', function() {
+			var grantedCallback = sinon.spy();
+			var deniedCallback = sinon.spy();
+			var requirePrivCallback = authRbac.requirePrivilege('priv-name', {
+				onAccessGranted: grantedCallback,
+				onAccessDenied: deniedCallback
+			});
+			requirePrivCallback(req, res, noErrorCallback);
 			expect(grantedCallback).to.not.have.been.called;
 			expect(deniedCallback).to.have.been.called;
 		});
@@ -182,6 +192,9 @@ describe('authRbac', function() {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
+			authCallback(req, res, function(err) {
+				expect(err).to.not.exist;
+			});
 			requirePrivCallback(req, res, function(err) {
 				expect(err).to.not.exist;
 			});
@@ -194,6 +207,9 @@ describe('authRbac', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
 			var requirePrivCallback = authRbac.requirePrivilege('priv-name');
 			var nextCallback = sinon.spy();
+			authCallback(req, res, function(err) {
+				expect(err).to.not.exist;
+			});
 			requirePrivCallback(req, res, nextCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(nextCallback).to.have.been.called;
@@ -202,6 +218,9 @@ describe('authRbac', function() {
 		it('responds with error 200 if onAccessGranted callback not given and access allowed', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
 			var requirePrivCallback = authRbac.requirePrivilege('priv-name');
+			authCallback(req, res, function(err) {
+				expect(err).to.not.exist;
+			});
 			requirePrivCallback(req, res);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(res).to.have.property('statusCode', 200);
@@ -211,6 +230,9 @@ describe('authRbac', function() {
 			roleHasPrivilege.callsArgWith(2, null, false);
 			var requirePrivCallback = authRbac.requirePrivilege('priv-name');
 			var nextCallback = sinon.spy();
+			authCallback(req, res, function(err) {
+				expect(err).to.not.exist;
+			});
 			requirePrivCallback(req, res, nextCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(nextCallback).to.not.have.been.called;
@@ -224,6 +246,9 @@ describe('authRbac', function() {
 			var requirePrivCallback = authRbac.requirePrivilege('priv-name', {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
+			});
+			authCallback(req, res, function(err) {
+				expect(err).to.not.exist;
 			});
 			requirePrivCallback(req, res, function(err) {
 				expect(err).to.exist;

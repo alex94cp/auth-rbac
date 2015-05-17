@@ -47,6 +47,15 @@ describe('User', function() {
 			expect(userGetRole).to.have.been.calledWith('user-info');
 		});
 
+		it('invokes callback with null if userGetRole returns null', function() {
+			userGetRole.callsArgWith(1, null, null);
+			user.getRole(function(err, role) {
+				expect(err).to.not.exist;
+				expect(role).to.not.exist;
+			});
+			expect(userGetRole).to.have.been.calledWith('user-info');
+		});
+
 		it('propagates userGetRole callback errors', function() {
 			userGetRole.callsArgWith(1, new Error);
 			user.getRole(function(err, role) {
