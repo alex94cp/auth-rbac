@@ -33,7 +33,7 @@ describe('Auth', function() {
 			expect(authenticateUser).to.have.been.calledWith(creds);
 		});
 
-		it('propagates stub errors', function() {
+		it('propagates authenticateUser callback errors', function() {
 			var creds = { user: 'user-id' };
 			authenticateUser.callsArgWith(1, new Error);
 			auth.authenticateUser(creds, function(err, user) {

@@ -199,7 +199,7 @@ describe('authRbac', function() {
 			expect(nextCallback).to.have.been.called;
 		});
 
-		it('returns with error 200 if onAccessGranted callback not given and access allowed', function() {
+		it('responds with error 200 if onAccessGranted callback not given and access allowed', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
 			var requirePrivCallback = authRbac.requirePrivilege('priv-name');
 			requirePrivCallback(req, res);

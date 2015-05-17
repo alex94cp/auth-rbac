@@ -47,7 +47,7 @@ describe('User', function() {
 			expect(userGetRole).to.have.been.calledWith('user-info');
 		});
 
-		it('propagates stub errors', function() {
+		it('propagates userGetRole callback errors', function() {
 			userGetRole.callsArgWith(1, new Error);
 			user.getRole(function(err, role) {
 				expect(err).to.exist;
@@ -56,7 +56,7 @@ describe('User', function() {
 			expect(userGetRole).to.have.been.calledWith('user-info');
 		});
 
-		it('caches stub result', function() {
+		it('caches userGetRole callback result', function() {
 			userGetRole.callsArgWith(1, null, 'role-info');
 			var callback = function(err, role) {
 				expect(err).to.not.exist;
@@ -68,9 +68,9 @@ describe('User', function() {
 			expect(userGetRole).to.have.been.calledOnce;
 		});
 
-		it('retries call if stub returns error', function() {
+		it('retries call if userGetRole callback returns error', function() {
 			userGetRole.onFirstCall().callsArgWith(1, new Error)
-			               .onSecondCall().callsArgWith(1, null, 'role-info');
+			           .onSecondCall().callsArgWith(1, null, 'role-info');
 			user.getRole(function(err, role) {
 				expect(err).to.exist;
 				expect(role).to.not.exist;
