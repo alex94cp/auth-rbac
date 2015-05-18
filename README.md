@@ -55,15 +55,16 @@ You are enticed to contribute with your own plugins. If you do so, make me know 
 ```js
 var auth = authRbac({
 	authenticateUser: function(creds, cb) {
-		// return user info or null
+		// invoke cb with (err, user)
+		//   where user can be null
 	},
 
 	userGetRole: function(user, cb) {
-		// return user role info or null
+		// invoke cb with (err, role)
 	},
 
 	roleHasPrivilege: function(role, priv, cb) {
-		// return whether role has privilege
+		// invoke cb with (err, hasPriv)
 	}
 });
 ```
