@@ -25,7 +25,7 @@ var Group = require('./models/groups');
 
 var Route = authRbacMongoose.Route;
 var credSchema = { name: String, pass: String };
-var userRoute = new Route(credSchema).field('user').linkWith('name').gives(User);
+var userRoute = new Route(credSchema).field('user').linkedWith('name').gives(User);
 var roleRoute = Route.newFrom(userRoute).field('group_id').dbRef.gives(Group);
 var privRoute = Route.newFrom(roleRoute).field('privs');
 var auth = authRbac(authRbacMongoose(userRoute, roleRoute, privRoute));
