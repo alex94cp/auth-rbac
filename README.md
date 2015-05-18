@@ -13,28 +13,27 @@ RBAC-based authorization library for [node](http://nodejs.org/)
 $ npm install auth-rbac
 ```
 
-## Sample usage
+## Sample usaget
 
 ```js
 var authRbac = require('auth-rbac');
-authRbac.mongoose = require('auth-rbac-mongoose');
-authRbac.httpBasic = require('auth-rbac-http-basic');
+var authRbacMongoose = require('auth-rbac-mongoose');
+var authRbacHttpBasic = require('auth-rbac-http-basic');
 
 var User = require('./models/users');
 var Group = require('./models/groups');
 
-var Route = authRbac.mongoose.Route;
+var Route = authRbacMongoose.Route;
 var credSchema = { name: String, pass: String };
 var userRoute = new Route(credSchema).field('user').linkWith('name').gives(User);
 var roleRoute = Route.newFrom(userRoute).field('group_id').dbRef.gives(Group);
 var privRoute = Route.newFrom(roleRoute).field('privs');
-var auth = authRbac.mongoose(userRoute, roleRoute, privRoute);
+var auth = authRbac(authRbacMongoose(userRoute, roleRoute, privRoute));
 
 var express = require('express');
 var app = express();
 
-var httpBasic = authRbac.httpBasic('example');
-app.use(authRbac.authenticate(auth, httpBasic));
+app.use(authRbac.authenticate(auth, authRbacHttpBasic('example')));
 app.get('/resources', authRbac.requirePrivilege(auth, 'resource-list', {
 	onAccessGranted: function(req, res) {
 		res.send('Access granted');
