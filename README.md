@@ -23,18 +23,22 @@ var authRbacHttpBasic = require('auth-rbac-http-basic');
 var User = require('./models/users');
 var Group = require('./models/groups');
 
-var Route = authRbacMongoose.Route;
-var credRoute = new Route({ name: String, pass: String });
-var userRoute = Route.newFrom(credRoute).field('user').linkedWith('name').gives(User);
-var roleRoute = Route.newFrom(userRoute).field('group_id').dbRef.gives(Group);
-var privRoute = Route.newFrom(roleRoute).field('privs');
-var auth = authRbac(authRbacMongoose(userRoute, roleRoute, privRoute));
-
 var express = require('express');
 var app = express();
 
+function checkUserPass(user, creds, cb) {
+	return cb(null, user.pass === creds.pass);
+}
+
+var Route = authRbacMongoose.Route;
+var credRoute = new Route({ name: String, pass: String }).saveAs('creds');
+var credUserRoute = credRoute.field('user').linkedWith('name').gives(User).check(checkUserPass, 'creds');
+var roleRoute = Route.newFrom(userRoute).field('group_id').dbRef.gives(Group);
+var privRoute = Route.newFrom(roleRoute).field('privs');
+var auth = authRbac(authRbacMongoose(credUserRoute, roleRoute, privRoute));
 app.use(authRbac.authenticate(auth, authRbacHttpBasic('example')));
-app.get('/resources', authRbac.requirePrivilege(auth, 'resource-list', {
+
+app.get('/resources', authRbac.requirePrivilege('resource-list', {
 	onAccessGranted: function(req, res) {
 		res.send('Access granted');
 	}
