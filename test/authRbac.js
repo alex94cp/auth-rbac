@@ -73,6 +73,17 @@ describe('authRbac', function() {
 			expect(askForCredentials).to.not.have.been.called;
 		});
 
+		it('does not overwrite req.auth if present', function() {
+			req.auth = {};
+			authCallback(req, res, function(err) {
+				expect(err).to.not.exist;
+				expect(req).to.not.have.deep.property('auth.user');
+				expect(req).to.not.have.deep.property('auth.role');
+			});
+			expect(extractCredentials).to.not.have.been.called;
+			expect(askForCredentials).to.not.have.been.called;
+		});
+
 		it('propagates authenticateUser errors', function() {
 			extractCredentials.returns({ user: 'user-id' });
 			authenticateUser.callsArgWith(1, new Error);
