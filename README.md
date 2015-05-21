@@ -45,6 +45,11 @@ app.get('/resources', authRbac.requirePrivilege('resource-list', {
 		res.send('Access granted');
 	}
 }));
+
+app.use('/debug', authRbac.requirePrivilege('devel-debug'));
+app.get('/debug/say/:what', function(req, res) {
+	req.send(req.params.what);
+});
 ```
 
 ## Tips
