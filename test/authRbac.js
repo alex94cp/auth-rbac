@@ -9,38 +9,43 @@ authRbac.User = require('../lib/user');
 authRbac.Role = require('../lib/role');
 var httpMocks = require('node-mocks-http');
 
+var extractCredentials = sinon.stub();
+var askForCredentials = sinon.stub();
+
 var authenticateUser = sinon.stub();
 var userGetRole = sinon.stub();
 var roleHasPrivilege = sinon.stub();
-
-var extractCredentials = sinon.stub();
-var askForCredentials = sinon.stub();
 
 function noErrorCallback(err) {
 	expect(err).to.not.exist;
 }
 
-describe('authRbac', function() {
+describe('AuthRbac', function() {
 	var auth;
-	beforeEach(function() {
-		auth = authRbac({
+	before(function() {
+		var frontend = authRbac.frontend({
+			extractCredentials: extractCredentials,
+			askForCredentials: askForCredentials,
+		});
+		var backend = authRbac.backend({
 			authenticateUser: authenticateUser,
 			userGetRole: userGetRole,
 			roleHasPrivilege: roleHasPrivilege
 		});
+		auth = authRbac(frontend, backend);
 	});
 
-	describe('authenticate', function() {
+	describe('#authenticate', function() {
 		var req, res, authCallback;
+		before(function() {
+			authCallback = auth.authenticate();
+		});
+
 		beforeEach(function() {
 			extractCredentials.reset();
 			askForCredentials.reset();
 			req = httpMocks.createRequest();
 			res = httpMocks.createResponse();
-			authCallback = authRbac.authenticate(auth, {
-				extractCredentials: extractCredentials,
-				askForCredentials: askForCredentials
-			});
 		});
 
 		it('sets req.auth info', function() {
@@ -123,30 +128,30 @@ describe('authRbac', function() {
 		});
 	});
 
-	describe('requirePrivilege', function() {
-		var req, res, authCallback;
-		beforeEach(function() {
-			roleHasPrivilege.reset();
+	describe('#requirePrivilege', function() {
+		var req, res;
+		var grantedCallback, deniedCallback;
+
+		before(function() {
 			extractCredentials.returns({ user: 'user-id' });
 			authenticateUser.callsArgWith(1, null, 'user-info');
 			userGetRole.callsArgWith(1, null, 'role-info');
-			authCallback = authRbac.authenticate(auth, {
-				extractCredentials: extractCredentials,
-				askForCredentials: askForCredentials
-			});
+		});
+
+		beforeEach(function() {
+			roleHasPrivilege.reset();
 			req = httpMocks.createRequest();
 			res = httpMocks.createResponse();
+			grantedCallback = sinon.spy();
+			deniedCallback = sinon.spy();
 		});
 
 		it('invokes onAccessGranted if access allowed', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
-			var grantedCallback = sinon.spy();
-			var deniedCallback = sinon.spy();
-			var requirePrivCallback = authRbac.requirePrivilege('priv-name', {
+			var requirePrivCallback = auth.requirePrivilege('priv-name', {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
-			authCallback(req, res, noErrorCallback);
 			requirePrivCallback(req, res, noErrorCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(grantedCallback).to.have.been.called;
@@ -154,13 +159,10 @@ describe('authRbac', function() {
 		});
 
 		it('invokes onAccessGranted if no privilege required', function() {
-			var grantedCallback = sinon.spy();
-			var deniedCallback = sinon.spy();
-			var requirePrivCallback = authRbac.requirePrivilege(null, {
+			var requirePrivCallback = auth.requirePrivilege(null, {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
-			authCallback(req, res, noErrorCallback);
 			requirePrivCallback(req, res, noErrorCallback);
 			expect(roleHasPrivilege).to.not.have.been.called;
 			expect(grantedCallback).to.have.been.called;
@@ -169,27 +171,12 @@ describe('authRbac', function() {
 
 		it('invokes onAccessDenied otherwise', function() {
 			roleHasPrivilege.callsArgWith(2, null, false);
-			var grantedCallback = sinon.spy();
-			var deniedCallback = sinon.spy();
-			var requirePrivCallback = authRbac.requirePrivilege('priv-name', {
+			var requirePrivCallback = auth.requirePrivilege('priv-name', {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
-			authCallback(req, res, noErrorCallback);
 			requirePrivCallback(req, res, noErrorCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
-			expect(grantedCallback).to.not.have.been.called;
-			expect(deniedCallback).to.have.been.called;
-		});
-
-		it('also denies access if req.auth not set', function() {
-			var grantedCallback = sinon.spy();
-			var deniedCallback = sinon.spy();
-			var requirePrivCallback = authRbac.requirePrivilege('priv-name', {
-				onAccessGranted: grantedCallback,
-				onAccessDenied: deniedCallback
-			});
-			requirePrivCallback(req, res, noErrorCallback);
 			expect(grantedCallback).to.not.have.been.called;
 			expect(deniedCallback).to.have.been.called;
 		});
@@ -197,18 +184,11 @@ describe('authRbac', function() {
 		it('invokes priv callback to get required privilege', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
 			var privCallback = sinon.stub().returns('priv-name');
-			var grantedCallback = sinon.spy();
-			var deniedCallback = sinon.spy();
-			var requirePrivCallback = authRbac.requirePrivilege(privCallback, {
+			var requirePrivCallback = auth.requirePrivilege(privCallback, {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
 			});
-			authCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
-			requirePrivCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
+			requirePrivCallback(req, res, noErrorCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(grantedCallback).to.have.been.called;
 			expect(deniedCallback).to.not.have.been.called;
@@ -216,35 +196,23 @@ describe('authRbac', function() {
 
 		it('calls next middleware if onAccessGranted callback not given and access allowed', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
-			var requirePrivCallback = authRbac.requirePrivilege('priv-name');
 			var nextCallback = sinon.spy();
-			authCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
-			requirePrivCallback(req, res, nextCallback);
+			auth.requirePrivilege('priv-name')(req, res, nextCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(nextCallback).to.have.been.called;
 		});
 
 		it('responds with error 200 if onAccessGranted callback not given and access allowed', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
-			var requirePrivCallback = authRbac.requirePrivilege('priv-name');
-			authCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
-			requirePrivCallback(req, res);
+			auth.requirePrivilege('priv-name')(req, res);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(res).to.have.property('statusCode', 200);
 		});
 
 		it('responds with error 401 if onAccessDenied callback not given and access denied', function() {
 			roleHasPrivilege.callsArgWith(2, null, false);
-			var requirePrivCallback = authRbac.requirePrivilege('priv-name');
 			var nextCallback = sinon.spy();
-			authCallback(req, res, function(err) {
-				expect(err).to.not.exist;
-			});
-			requirePrivCallback(req, res, nextCallback);
+			auth.requirePrivilege('priv-name')(req, res, nextCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			expect(nextCallback).to.not.have.been.called;
 			expect(res).to.have.property('statusCode', 401);
@@ -252,14 +220,9 @@ describe('authRbac', function() {
 
 		it('propagates roleHasPrivilege errors', function() {
 			roleHasPrivilege.callsArgWith(2, new Error);
-			var grantedCallback = sinon.spy();
-			var deniedCallback = sinon.spy();
-			var requirePrivCallback = authRbac.requirePrivilege('priv-name', {
+			var requirePrivCallback = auth.requirePrivilege('priv-name', {
 				onAccessGranted: grantedCallback,
 				onAccessDenied: deniedCallback
-			});
-			authCallback(req, res, function(err) {
-				expect(err).to.not.exist;
 			});
 			requirePrivCallback(req, res, function(err) {
 				expect(err).to.exist;

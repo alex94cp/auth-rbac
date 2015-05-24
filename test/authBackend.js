@@ -11,10 +11,10 @@ var authenticateUser = sinon.stub();
 var userGetRole = sinon.stub();
 var roleHasPrivilege = sinon.stub();
 
-describe('Auth', function() {
-	var auth;
+describe('AuthBackend', function() {
+	var backend;
 	beforeEach(function() {
-		auth = authRbac({
+		backend = authRbac.backend({
 			authenticateUser: authenticateUser,
 			userGetRole: userGetRole,
 			roleHasPrivilege: roleHasPrivilege
@@ -25,7 +25,7 @@ describe('Auth', function() {
 		it('invokes callback with user', function() {
 			var creds = { user: 'user-id' };
 			authenticateUser.callsArgWith(1, null, 'user-info');
-			auth.authenticateUser(creds, function(err, user) {
+			backend.authenticateUser(creds, function(err, user) {
 				expect(err).to.not.exist;
 				expect(user).to.be.an.instanceof(authRbac.User)
 				            .and.have.property('info', 'user-info');
@@ -36,7 +36,7 @@ describe('Auth', function() {
 		it('propagates authenticateUser callback errors', function() {
 			var creds = { user: 'user-id' };
 			authenticateUser.callsArgWith(1, new Error);
-			auth.authenticateUser(creds, function(err, user) {
+			backend.authenticateUser(creds, function(err, user) {
 				expect(err).to.exist;
 				expect(user).to.not.exist;
 			});

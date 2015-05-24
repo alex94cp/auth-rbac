@@ -13,17 +13,18 @@ var userGetRoleStub = sinon.stub();
 var roleHasPrivilegeStub = sinon.stub();
 
 describe('Role', function() {
-	var auth, role;
+	var backend;
 	before(function() {
-		auth = authRbac({
+		backend = authRbac.backend({
 			authenticateUser: authenticateUserStub,
 			userGetRole: userGetRoleStub,
 			roleHasPrivilege: roleHasPrivilegeStub
 		});
 	});
 
+	var role;
 	beforeEach(function() {
-		role = new authRbac.Role(auth, 'role-info');
+		role = new authRbac.Role(backend, 'role-info');
 	});
 
 	describe('#info', function() {
