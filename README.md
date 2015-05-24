@@ -50,7 +50,7 @@ app.get('/resources', auth.requirePrivilege('resource-list', {
 
 app.use('/debug', auth.requirePrivilege('devel-debug'));
 app.get('/debug/say/:what', function(req, res) {
-	req.send(req.params.what);
+	res.send(req.params.what);
 });
 ```
 
@@ -66,7 +66,19 @@ You are enticed to contribute with your own plugins. If you do so, make me know 
 ## Raw interface (for plugin developers)
 
 ```js
-var auth = authRbac({
+var frontend = authRbac.frontend({
+	extractCredentials: function(req) {
+		// return credentials in request or null
+	},
+
+	askForCredentials: function(res) {
+		// ask for credentials, ie: res.sendStatus(401)
+	}
+});
+```
+
+```js
+var backend = authRbac.backend({
 	authenticateUser: function(creds, cb) {
 		// invoke cb with (err, user)
 		//   where user can be null
@@ -80,16 +92,4 @@ var auth = authRbac({
 		// invoke cb with (err, hasPriv)
 	}
 });
-```
-
-```js
-app.use(authRbac.authenticate(auth, {
-	extractCredentials: function(req) {
-		// return credentials in request or null
-	},
-
-	askForCredentials: function(res) {
-		// ask for credentials, ie: res.sendStatus(401)
-	}
-}));
 ```
