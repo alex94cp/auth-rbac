@@ -202,13 +202,6 @@ describe('AuthRbac', function() {
 			expect(nextCallback).to.have.been.called;
 		});
 
-		it('responds with error 200 if onAccessGranted callback not given and access allowed', function() {
-			roleHasPrivilege.callsArgWith(2, null, true);
-			auth.requirePrivilege('priv-name')(req, res);
-			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
-			expect(res).to.have.property('statusCode', 200);
-		});
-
 		it('responds with error 401 if onAccessDenied callback not given and access denied', function() {
 			roleHasPrivilege.callsArgWith(2, null, false);
 			var nextCallback = sinon.spy();
