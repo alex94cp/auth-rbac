@@ -37,16 +37,18 @@ var credRoute = new Route({ name: String, pass: String }).saveAs('creds');
 var userRoute = credRoute.field('user').linkedWith('name').gives(User).assert(validUserCreds);
 var roleRoute = Route.newFrom(userRoute).field('group_id').dbRef.gives(Group);
 var privRoute = Route.newFrom(roleRoute).field('privs');
-var auth = authRbac(authRbacMongoose(userRoute, roleRoute, privRoute));
 
-app.use(authRbac.authenticate(auth, authRbacHttpBasic('example')));
-app.get('/resources', authRbac.requirePrivilege('resource-list', {
+var frontend = authRbacHttpBasic('example');
+var backend = authRbacMongoose(userRoute, roleRoute, privRoute);
+var auth = authRbac(frontend, backend);
+
+app.get('/resources', auth.requirePrivilege('resource-list', {
 	onAccessGranted: function(req, res) {
 		res.send('Access granted');
 	}
 }));
 
-app.use('/debug', authRbac.requirePrivilege('devel-debug'));
+app.use('/debug', auth.requirePrivilege('devel-debug'));
 app.get('/debug/say/:what', function(req, res) {
 	req.send(req.params.what);
 });
