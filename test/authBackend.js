@@ -24,11 +24,11 @@ describe('AuthBackend', function() {
 	describe('#authenticateUser', function() {
 		it('invokes callback with user', function() {
 			var creds = { user: 'user-id' };
-			authenticateUser.callsArgWith(1, null, 'user-info');
+			authenticateUser.callsArgWith(1, null, 'user-model');
 			backend.authenticateUser(creds, function(err, user) {
 				expect(err).to.not.exist;
 				expect(user).to.be.an.instanceof(authRbac.User)
-				            .and.have.property('info', 'user-info');
+				            .and.have.property('model', 'user-model');
 			});
 			expect(authenticateUser).to.have.been.calledWith(creds);
 		});

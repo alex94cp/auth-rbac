@@ -50,17 +50,17 @@ describe('AuthRbac', function() {
 
 		it('sets req.auth info', function() {
 			extractCredentials.returns({ user: 'user-id' });
-			authenticateUser.callsArgWith(1, null, 'user-info');
-			userGetRole.callsArgWith(1, null, 'role-info');
+			authenticateUser.callsArgWith(1, null, 'user-model');
+			userGetRole.callsArgWith(1, null, 'role-model');
 			authCallback(req, res, function(err) {
 				expect(err).to.not.exist;
 				expect(req).to.have.property('auth');
 				expect(req).to.have.deep.property('auth.user')
 				           .which.is.an.instanceof(authRbac.User)
-				           .and.has.property('info', 'user-info');
+				           .and.has.property('model', 'user-model');
 				expect(req).to.have.deep.property('auth.role')
 				           .which.is.an.instanceof(authRbac.Role)
-				           .and.has.property('info', 'role-info');
+				           .and.has.property('model', 'role-model');
 			});
 			expect(extractCredentials).to.have.been.calledWith(req);
 			expect(askForCredentials).to.not.have.been.called;
@@ -104,14 +104,14 @@ describe('AuthRbac', function() {
 
 		it('propagates userGetRole errors', function() {
 			extractCredentials.returns({ user: 'user-id' });
-			authenticateUser.callsArgWith(1, null, 'user-info');
+			authenticateUser.callsArgWith(1, null, 'user-model');
 			userGetRole.callsArgWith(1, new Error);
 			authCallback(req, res, function(err) {
 				expect(err).to.exist;
 				expect(req).to.have.property('auth');
 				expect(req).to.have.deep.property('auth.user')
 				           .which.is.an.instanceof(authRbac.User)
-				           .and.has.property('info', 'user-info');
+				           .and.has.property('model', 'user-model');
 				expect(req).to.have.deep.property('auth.role', null);
 			});
 			expect(extractCredentials).to.have.been.calledWith(req);
@@ -134,8 +134,8 @@ describe('AuthRbac', function() {
 
 		before(function() {
 			extractCredentials.returns({ user: 'user-id' });
-			authenticateUser.callsArgWith(1, null, 'user-info');
-			userGetRole.callsArgWith(1, null, 'role-info');
+			authenticateUser.callsArgWith(1, null, 'user-model');
+			userGetRole.callsArgWith(1, null, 'role-model');
 		});
 
 		beforeEach(function() {
@@ -153,7 +153,7 @@ describe('AuthRbac', function() {
 				onAccessDenied: deniedCallback
 			});
 			requirePrivCallback(req, res, noErrorCallback);
-			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilege).to.have.been.calledWith('role-model', 'priv-name');
 			expect(grantedCallback).to.have.been.called;
 			expect(deniedCallback).to.not.have.been.called;
 		});
@@ -176,7 +176,7 @@ describe('AuthRbac', function() {
 				onAccessDenied: deniedCallback
 			});
 			requirePrivCallback(req, res, noErrorCallback);
-			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilege).to.have.been.calledWith('role-model', 'priv-name');
 			expect(grantedCallback).to.not.have.been.called;
 			expect(deniedCallback).to.have.been.called;
 		});
@@ -189,7 +189,7 @@ describe('AuthRbac', function() {
 				onAccessDenied: deniedCallback
 			});
 			requirePrivCallback(req, res, noErrorCallback);
-			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilege).to.have.been.calledWith('role-model', 'priv-name');
 			expect(grantedCallback).to.have.been.called;
 			expect(deniedCallback).to.not.have.been.called;
 		});
@@ -198,7 +198,7 @@ describe('AuthRbac', function() {
 			roleHasPrivilege.callsArgWith(2, null, true);
 			var nextCallback = sinon.spy();
 			auth.requirePrivilege('priv-name')(req, res, nextCallback);
-			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilege).to.have.been.calledWith('role-model', 'priv-name');
 			expect(nextCallback).to.have.been.called;
 		});
 
@@ -206,7 +206,7 @@ describe('AuthRbac', function() {
 			roleHasPrivilege.callsArgWith(2, null, false);
 			var nextCallback = sinon.spy();
 			auth.requirePrivilege('priv-name')(req, res, nextCallback);
-			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilege).to.have.been.calledWith('role-model', 'priv-name');
 			expect(nextCallback).to.not.have.been.called;
 			expect(res).to.have.property('statusCode', 401);
 		});
@@ -220,7 +220,7 @@ describe('AuthRbac', function() {
 			requirePrivCallback(req, res, function(err) {
 				expect(err).to.exist;
 			});
-			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilege).to.have.been.calledWith('role-model', 'priv-name');
 			expect(grantedCallback).to.not.have.been.called;
 			expect(deniedCallback).to.not.have.been.called;
 		});

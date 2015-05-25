@@ -24,12 +24,12 @@ describe('Role', function() {
 
 	var role;
 	beforeEach(function() {
-		role = new authRbac.Role(backend, 'role-info');
+		role = new authRbac.Role(backend, 'role-model');
 	});
 
-	describe('#info', function() {
-		it('returns role info', function() {
-			expect(role).to.have.property('info', 'role-info');
+	describe('#model', function() {
+		it('returns role model', function() {
+			expect(role).to.have.property('model', 'role-model');
 		});
 	});
 
@@ -40,7 +40,7 @@ describe('Role', function() {
 				expect(err).to.not.exist;
 				expect(hasPriv).to.be.true;
 			});
-			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-model', 'priv-name');
 		});
 
 		it('invokes callback with false otherwise', function() {
@@ -49,7 +49,7 @@ describe('Role', function() {
 				expect(err).to.not.exist;
 				expect(hasPriv).to.be.false;
 			});
-			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-model', 'priv-name');
 		});
 
 		it('propagates stub errors', function() {
@@ -58,7 +58,7 @@ describe('Role', function() {
 				expect(err).to.exist;
 				expect(hasPriv).to.not.exist;
 			});
-			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-info', 'priv-name');
+			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-model', 'priv-name');
 		});
 	});
 })

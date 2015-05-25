@@ -17,19 +17,19 @@ describe('User', function() {
 	before(function() {
 		backend = authRbac.backend({
 			authenticateUser: authenticateUser,
-			userGetRole: userGetRole,
+			userGetRole:      userGetRole,
 			roleHasPrivilege: roleHasPrivilege
 		});
 	});
 
 	var user;
 	beforeEach(function() {
-		user = new authRbac.User(backend, 'user-info');
+		user = new authRbac.User(backend, 'user-model');
 	});
 
-	describe('#info', function() {
-		it('returns user info', function() {
-			expect(user).to.have.property('info', 'user-info');
+	describe('#model', function() {
+		it('returns user model', function() {
+			expect(user).to.have.property('model', 'user-model');
 		});
 	});
 
@@ -39,13 +39,13 @@ describe('User', function() {
 		});
 
 		it('invokes callback with role', function() {
-			userGetRole.callsArgWith(1, null, 'role-info');
+			userGetRole.callsArgWith(1, null, 'role-model');
 			user.getRole(function(err, role) {
 				expect(err).to.not.exist;
 				expect(role).to.be.an.instanceof(authRbac.Role)
-				            .and.have.property('info', 'role-info');
+				            .and.have.property('model', 'role-model');
 			});
-			expect(userGetRole).to.have.been.calledWith('user-info');
+			expect(userGetRole).to.have.been.calledWith('user-model');
 		});
 
 		it('invokes callback with null if userGetRole returns null', function() {
@@ -54,7 +54,7 @@ describe('User', function() {
 				expect(err).to.not.exist;
 				expect(role).to.not.exist;
 			});
-			expect(userGetRole).to.have.been.calledWith('user-info');
+			expect(userGetRole).to.have.been.calledWith('user-model');
 		});
 
 		it('propagates userGetRole callback errors', function() {
@@ -63,15 +63,15 @@ describe('User', function() {
 				expect(err).to.exist;
 				expect(role).to.not.exist;
 			});
-			expect(userGetRole).to.have.been.calledWith('user-info');
+			expect(userGetRole).to.have.been.calledWith('user-model');
 		});
 
 		it('caches userGetRole callback result', function() {
-			userGetRole.callsArgWith(1, null, 'role-info');
+			userGetRole.callsArgWith(1, null, 'role-model');
 			var callback = function(err, role) {
 				expect(err).to.not.exist;
 				expect(role).to.be.an.instanceof(authRbac.Role)
-				            .and.have.property('info', 'role-info');
+				            .and.have.property('model', 'role-model');
 			};
 			user.getRole(callback);
 			user.getRole(callback);
@@ -80,7 +80,7 @@ describe('User', function() {
 
 		it('retries call if userGetRole callback returns error', function() {
 			userGetRole.onFirstCall().callsArgWith(1, new Error)
-			           .onSecondCall().callsArgWith(1, null, 'role-info');
+			           .onSecondCall().callsArgWith(1, null, 'role-model');
 			user.getRole(function(err, role) {
 				expect(err).to.exist;
 				expect(role).to.not.exist;
@@ -88,7 +88,7 @@ describe('User', function() {
 			user.getRole(function(err, role) {
 				expect(err).to.not.exist;
 				expect(role).to.be.an.instanceof(authRbac.Role)
-				            .and.have.property('info', 'role-info');
+				            .and.have.property('model', 'role-model');
 			});
 			expect(userGetRole).to.have.been.calledTwice;
 		});
