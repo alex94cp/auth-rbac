@@ -21,6 +21,10 @@
   ],
   "author": "Alejandro Caravaca Puchades <alex94puchades@gmail.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alex94puchades/auth-rbac/issues"
+  },
+  "homepage": "https://github.com/alex94puchades/auth-rbac#readme",
   "devDependencies": {
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",

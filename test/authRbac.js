@@ -202,13 +202,13 @@ describe('AuthRbac', function() {
 			expect(nextCallback).to.have.been.called;
 		});
 
-		it('responds with error 401 if onAccessDenied callback not given and access denied', function() {
+		it('responds with error 403 if onAccessDenied callback not given and access denied', function() {
 			roleHasPrivilege.callsArgWith(2, null, false);
 			var nextCallback = sinon.spy();
 			auth.requirePrivilege('priv-name')(req, res, nextCallback);
 			expect(roleHasPrivilege).to.have.been.calledWith('role-model', 'priv-name');
 			expect(nextCallback).to.not.have.been.called;
-			expect(res).to.have.property('statusCode', 401);
+			expect(res).to.have.property('statusCode', 403);
 		});
 
 		it('propagates roleHasPrivilege errors', function() {
