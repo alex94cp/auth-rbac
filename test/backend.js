@@ -11,7 +11,7 @@ var authenticateUser = sinon.stub();
 var userGetRole = sinon.stub();
 var roleHasPrivilege = sinon.stub();
 
-describe('AuthBackend', function() {
+describe('Backend', function() {
 	var backend;
 	beforeEach(function() {
 		backend = authRbac.backend({

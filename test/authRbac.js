@@ -94,9 +94,7 @@ describe('AuthRbac', function() {
 			authenticateUser.callsArgWith(1, new Error);
 			authCallback(req, res, function(err) {
 				expect(err).to.exist;
-				expect(req).to.have.property('auth');
-				expect(req).to.have.deep.property('auth.user', null);
-				expect(req).to.have.deep.property('auth.role', null);
+				expect(req).not.to.have.property('auth');
 			});
 			expect(extractCredentials).to.have.been.calledWith(req);
 			expect(askForCredentials).to.not.have.been.called;
@@ -108,11 +106,7 @@ describe('AuthRbac', function() {
 			userGetRole.callsArgWith(1, new Error);
 			authCallback(req, res, function(err) {
 				expect(err).to.exist;
-				expect(req).to.have.property('auth');
-				expect(req).to.have.deep.property('auth.user')
-				           .which.is.an.instanceof(authRbac.User)
-				           .and.has.property('model', 'user-model');
-				expect(req).to.have.deep.property('auth.role', null);
+				expect(req).not.to.have.property('auth');
 			});
 			expect(extractCredentials).to.have.been.calledWith(req);
 			expect(askForCredentials).to.not.have.been.called;
