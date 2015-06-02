@@ -58,8 +58,8 @@ app.get('/debug/say/:what', function(req, res) {
 
 For a better experience, you should make use of auth-rbac plugins, such as:
 
-* [auth-rbac-http-basic](https://github.com/alex94puchades/auth-rbac-http-auth)
-* [auth-rbac-mongoose](https://github.com/alex94puchades/auth-rbac-mongoose)
+* [auth-rbac-http-basic](https://github.com/alex94puchades/node-auth-rbac-http-auth)
+* [auth-rbac-mongoose](https://github.com/alex94puchades/node-auth-rbac-mongoose)
 
 You are enticed to contribute with your own plugins. If you do so, make me know so that I can list it here with the others.
 
