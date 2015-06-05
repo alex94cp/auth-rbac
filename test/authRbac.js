@@ -20,7 +20,7 @@ function noErrorCallback(err) {
 	expect(err).to.not.exist;
 }
 
-describe('AuthRbac', function() {
+describe('authRbac', function() {
 	var auth;
 	before(function() {
 		var frontend = authRbac.frontend({
