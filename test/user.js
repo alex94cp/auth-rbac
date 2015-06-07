@@ -1,96 +1,40 @@
 var chai = require('chai');
-var expect = chai.expect;
 var sinon = require('sinon');
-var sinonChai = require('sinon-chai');
-chai.use(sinonChai);
 
-var authRbac = require('../');
-authRbac.User = require('../lib/user');
-authRbac.Role = require('../lib/role');
+var expect = chai.expect;
+chai.use(require('sinon-chai'));
 
-var authenticateUser = sinon.stub();
-var userGetRole = sinon.stub();
-var roleHasPrivilege = sinon.stub();
+var User = require('../lib/user');
+var Role = require('../lib/role');
 
 describe('User', function() {
-	var backend;
-	before(function() {
-		backend = authRbac.backend({
-			authenticateUser: authenticateUser,
-			userGetRole:      userGetRole,
-			roleHasPrivilege: roleHasPrivilege
+	describe('#info', function() {
+		it('exposes user info', function() {
+			var user = new User(undefined, 'user-info');
+			expect(user).to.have.property('info', 'user-info');
 		});
 	});
-
-	var user;
-	beforeEach(function() {
-		user = new authRbac.User(backend, 'user-model');
-	});
-
-	describe('#model', function() {
-		it('returns user model', function() {
-			expect(user).to.have.property('model', 'user-model');
-		});
-	});
-
+	
 	describe('#getRole', function() {
-		beforeEach(function() {
-			userGetRole.reset();
-		});
-
-		it('invokes callback with role', function() {
-			userGetRole.callsArgWith(1, null, 'role-model');
+		it('gives whatever userGetRole returns wrapped as a Role instance', function() {
+			var userGetRole = sinon.stub().callsArgWith(1, null, 'role-info');
+			var user = new User({ userGetRole: userGetRole }, 'user-info');
 			user.getRole(function(err, role) {
 				expect(err).to.not.exist;
-				expect(role).to.be.an.instanceof(authRbac.Role)
-				            .and.have.property('model', 'role-model');
+				expect(role).to.be.an.instanceof(Role)
+				            .and.to.have.property('info', 'role-info');
+				expect(userGetRole).to.have.been.calledWith('user-info');
 			});
-			expect(userGetRole).to.have.been.calledWith('user-model');
 		});
-
-		it('invokes callback with null if userGetRole returns null', function() {
-			userGetRole.callsArgWith(1, null, null);
-			user.getRole(function(err, role) {
-				expect(err).to.not.exist;
-				expect(role).to.not.exist;
-			});
-			expect(userGetRole).to.have.been.calledWith('user-model');
-		});
-
-		it('propagates userGetRole callback errors', function() {
-			userGetRole.callsArgWith(1, new Error);
+		
+		it('propagates userGetRole errors', function() {
+			var userGetRole = sinon.stub().callsArgWith(1, new Error);
+			var user = new User({ userGetRole: userGetRole }, 'user-info');
 			user.getRole(function(err, role) {
 				expect(err).to.exist;
 				expect(role).to.not.exist;
+				expect(userGetRole).to.have.been.calledWith('user-info');
 			});
-			expect(userGetRole).to.have.been.calledWith('user-model');
-		});
-
-		it('caches userGetRole callback result', function() {
-			userGetRole.callsArgWith(1, null, 'role-model');
-			var callback = function(err, role) {
-				expect(err).to.not.exist;
-				expect(role).to.be.an.instanceof(authRbac.Role)
-				            .and.have.property('model', 'role-model');
-			};
-			user.getRole(callback);
-			user.getRole(callback);
-			expect(userGetRole).to.have.been.calledOnce;
-		});
-
-		it('retries call if userGetRole callback returns error', function() {
-			userGetRole.onFirstCall().callsArgWith(1, new Error)
-			           .onSecondCall().callsArgWith(1, null, 'role-model');
-			user.getRole(function(err, role) {
-				expect(err).to.exist;
-				expect(role).to.not.exist;
-			});
-			user.getRole(function(err, role) {
-				expect(err).to.not.exist;
-				expect(role).to.be.an.instanceof(authRbac.Role)
-				            .and.have.property('model', 'role-model');
-			});
-			expect(userGetRole).to.have.been.calledTwice;
 		});
 	});
 });

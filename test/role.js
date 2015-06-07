@@ -1,64 +1,48 @@
 var chai = require('chai');
-var expect = chai.expect;
 var sinon = require('sinon');
-var sinonChai = require('sinon-chai');
-chai.use(sinonChai);
 
-var authRbac = require('../');
-authRbac.User = require('../lib/user');
-authRbac.Role = require('../lib/role');
+var expect = chai.expect;
+chai.use(require('sinon-chai'));
 
-var authenticateUserStub = sinon.stub();
-var userGetRoleStub = sinon.stub();
-var roleHasPrivilegeStub = sinon.stub();
+var Role = require('../lib/role');
 
 describe('Role', function() {
-	var backend;
-	before(function() {
-		backend = authRbac.backend({
-			authenticateUser: authenticateUserStub,
-			userGetRole: userGetRoleStub,
-			roleHasPrivilege: roleHasPrivilegeStub
+	describe('#info', function() {
+		it('exposes role info', function() {
+			var role = new Role(undefined, 'role-info');
+			expect(role).to.have.property('info', 'role-info');
 		});
 	});
-
-	var role;
-	beforeEach(function() {
-		role = new authRbac.Role(backend, 'role-model');
-	});
-
-	describe('#model', function() {
-		it('returns role model', function() {
-			expect(role).to.have.property('model', 'role-model');
-		});
-	});
-
+	
 	describe('#hasPrivilege', function() {
-		it('invokes callback with true if stub returns true', function() {
-			roleHasPrivilegeStub.callsArgWith(2, null, true);
-			role.hasPrivilege('priv-name', function(err, hasPriv) {
+		it('gives true if roleHasPrivilege gives true', function() {
+			var roleHasPrivilege = sinon.stub().callsArgWith(2, null, true);
+			var role = new Role({ roleHasPrivilege: roleHasPrivilege }, 'role-info');
+			role.hasPrivilege('priv-name', function(err, hasPrivilege) {
 				expect(err).to.not.exist;
-				expect(hasPriv).to.be.true;
+				expect(hasPrivilege).to.be.true;
+				expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			});
-			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-model', 'priv-name');
 		});
-
-		it('invokes callback with false otherwise', function() {
-			roleHasPrivilegeStub.callsArgWith(2, null, false);
-			role.hasPrivilege('priv-name', function(err, hasPriv) {
+		
+		it('gives false if roleHasPrivilege gives false', function() {
+			var roleHasPrivilege = sinon.stub().callsArgWith(2, null, false);
+			var role = new Role({ roleHasPrivilege: roleHasPrivilege }, 'role-info');
+			role.hasPrivilege('priv-name', function(err, hasPrivilege) {
 				expect(err).to.not.exist;
-				expect(hasPriv).to.be.false;
+				expect(hasPrivilege).to.be.false;
+				expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			});
-			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-model', 'priv-name');
 		});
-
-		it('propagates stub errors', function() {
-			roleHasPrivilegeStub.callsArgWith(2, new Error);
-			role.hasPrivilege('priv-name', function(err, hasPriv) {
+		
+		it('propagates roleHasPrivilege errors', function() {
+			var roleHasPrivilege = sinon.stub().callsArgWith(2, new Error);
+			var role = new Role({ roleHasPrivilege: roleHasPrivilege }, 'role-info');
+			role.hasPrivilege('priv-name', function(err, hasPrivilege) {
 				expect(err).to.exist;
-				expect(hasPriv).to.not.exist;
+				expect(hasPrivilege).to.not.exist;
+				expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 			});
-			expect(roleHasPrivilegeStub).to.have.been.calledWith('role-model', 'priv-name');
 		});
 	});
-})
+});
