@@ -19,7 +19,7 @@ $ npm install auth-rbac
 var authRbac = require('auth-rbac');
 
 var User = require('./models/user');
-var Group = require('./models/group');
+var Role = require('./models/role');
 
 var auth = authRbac({
 	getUser: (req, cb) => cb(null, req.user),
