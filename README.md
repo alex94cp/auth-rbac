@@ -21,10 +21,9 @@ var authRbac = require('auth-rbac');
 var User = require('./models/user');
 var Group = require('./models/group');
 
-// uses ES6 fat-arrow functions
 var auth = authRbac({
 	getUser: (req, cb) => cb(null, req.user),
-	userGetRole: (user, cb) => Group.findById(user.group, cb),
+	userGetRole: (user, cb) => Role.findById(user.role, cb),
 	roleHasPrivilege: (role, priv, cb) => cb(null, role.privileges.indexOf(priv) !== -1)
 });
 
@@ -32,7 +31,7 @@ var express = require('express');
 var app = express();
 
 app.use(authRbac.identify(auth));
-app.get('/users', authRbac.requirePrivilege('user:list'), function(req, res) {
+app.get('/users', authRbac.requirePrivilege('user:enum'), function(req, res) {
 	return res.sendStatus(200);
 });
 ```
