@@ -24,21 +24,21 @@ describe('identify', function() {
 		userGetRole.reset();
 	});
 	
-	it('fills request[outputField] with user and role info', function() {
+	it('fills request[assignField] with user and role info', function() {
 		getUser.callsArgWith(1, null, 'user-info');
 		userGetRole.callsArgWith(1, null, 'role-info');
-		var middleware = identify(authorizator, { outputField: 'outputField' });
+		var middleware = identify(authorizator, { assignField: 'assignField' });
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
 		middleware(request, response, function(err) {
 			expect(err).to.not.exist;
-			expect(request).to.have.property('outputField');
+			expect(request).to.have.property('assignField');
 			expect(getUser).to.have.been.calledWith(request);
 			expect(userGetRole).to.have.been.calledWith('user-info');
 		});
 	});
 	
-	it('does not overwrite outputField if already present', function() {
+	it('does not overwrite assignField if already present', function() {
 		getUser.callsArgWith(1, null, 'user-info');
 		userGetRole.callsArgWith(1, null, 'role-info');
 		var middleware = identify(authorizator);
@@ -55,12 +55,12 @@ describe('identify', function() {
 	
 	it('propagates getUser errors', function() {
 		getUser.callsArgWith(1, new Error);
-		var middleware = identify(authorizator, { outputField: 'outputField' });
+		var middleware = identify(authorizator, { assignField: 'assignField' });
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
 		middleware(request, response, function(err) {
 			expect(err).to.exist;
-			expect(request).to.not.have.property('outputField');
+			expect(request).to.not.have.property('assignField');
 			expect(getUser).to.have.been.calledWith(request);
 			expect(userGetRole).to.not.have.been.called;
 		});
@@ -69,12 +69,12 @@ describe('identify', function() {
 	it('propagates userGetRole errors', function() {
 		getUser.callsArgWith(1, null, 'user-info');
 		userGetRole.callsArgWith(1, new Error);
-		var middleware = identify(authorizator, { outputField: 'outputField' });
+		var middleware = identify(authorizator, { assignField: 'assignField' });
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
 		middleware(request, response, function(err) {
 			expect(err).to.exist;
-			expect(request).to.not.have.property('outputField');
+			expect(request).to.not.have.property('assignField');
 			expect(getUser).to.have.been.calledWith(request);
 			expect(userGetRole).to.have.been.calledWith('user-info');
 		});
