@@ -5,7 +5,7 @@ var httpMocks = require('node-mocks-http');
 var expect = chai.expect;
 chai.use(require('sinon-chai'));
 
-var Authorizator = require('../lib/authorizator');
+var Authority = require('../lib/authority');
 var identify = require('../lib/middleware/identify');
 var requirePrivilege = require('../lib/middleware/requirePrivilege');
 
@@ -19,12 +19,12 @@ describe('requirePrivilege', function() {
 		getUser = sinon.stub().callsArgWith(1, null, 'user-info');
 		userGetRole = sinon.stub().callsArgWith(1, null, 'role-info');
 		roleHasPrivilege = sinon.stub();
-		var authorizator = new Authorizator({
+		var authority = new Authority({
 			getUser: getUser,
 			userGetRole: userGetRole,
 			roleHasPrivilege: roleHasPrivilege
 		});
-		identifyMiddleware = identify(authorizator);
+		identifyMiddleware = identify(authority);
 		onAccessGranted = sinon.spy();
 		onAccessDenied = sinon.spy();
 	});
