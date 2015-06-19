@@ -88,7 +88,7 @@ describe('requirePrivilege', function() {
 		roleHasPrivilege.callsArgWith(2, null, true);
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
-		var callback = sinon.stub().callsArgWith(1, null, 'priv-name');
+		var callback = sinon.stub().returns('priv-name');
 		var middleware = requirePrivilege(callback, {
 			onAccessGranted: onAccessGranted,
 			onAccessDenied: onAccessDenied
