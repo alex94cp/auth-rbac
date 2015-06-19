@@ -1,3 +1,10 @@
+# Configuration files
+config.js
+config.js.old
+
+# Backup files
+*~
+
 # Logs
 logs
 *.log
