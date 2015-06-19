@@ -9,10 +9,23 @@ var Authority = require('../lib/authority');
 var User = require('../lib/user');
 
 describe('Authority', function() {
+	var getUser, authority;
+	before(function() {
+		getUser = sinon.stub();
+		authority = new Authority({
+			getUser: getUser,
+			userGetRole: sinon.stub(),
+			roleHasPrivilege: sinon.stub(),
+		});
+	})
+	
+	beforeEach(function() {
+		getUser.reset();
+	});
+	
 	describe('#getUser', function() {
 		it('gives whatever getUser returns wrapped as a User instance', function() {
-			var getUser = sinon.stub().callsArgWith(1, null, 'user-info');
-			var authority = new Authority({ getUser: getUser });
+			getUser.callsArgWith(1, null, 'user-info');
 			var request = httpMocks.createRequest();
 			authority.getUser(request, function(err, user) {
 				expect(err).to.not.exist;
@@ -23,8 +36,7 @@ describe('Authority', function() {
 		});
 		
 		it('propagates getUser errors', function() {
-			var getUser = sinon.stub().callsArgWith(1, new Error);
-			var authority = new Authority({ getUser: getUser });
+			getUser.callsArgWith(1, new Error);
 			var request = httpMocks.createRequest();
 			authority.getUser(request, function(err, user) {
 				expect(err).to.exist;

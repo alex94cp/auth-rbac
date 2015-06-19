@@ -16,6 +16,7 @@ describe('identify', function() {
 		authority = new Authority({
 			getUser: getUser,
 			userGetRole: userGetRole,
+			roleHasPrivilege: sinon.stub(),
 		});
 	});
 	
