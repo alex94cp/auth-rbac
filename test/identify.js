@@ -25,21 +25,21 @@ describe('identify', function() {
 		userGetRole.reset();
 	});
 	
-	it('fills request[assignField] with user and role info', function() {
+	it('fills property with user and role info', function() {
 		getUser.callsArgWith(1, null, 'user-info');
 		userGetRole.callsArgWith(1, null, 'role-info');
-		var middleware = identify(authority, { assignField: 'assignField' });
+		var middleware = identify(authority, { assignProperty: 'property' });
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
 		middleware(request, response, function(err) {
 			expect(err).to.not.exist;
-			expect(request).to.have.property('assignField');
+			expect(request).to.have.property('property');
 			expect(getUser).to.have.been.calledWith(request);
 			expect(userGetRole).to.have.been.calledWith('user-info');
 		});
 	});
 	
-	it('does not overwrite assignField if already present', function() {
+	it('does not overwrite property if already present', function() {
 		getUser.callsArgWith(1, null, 'user-info');
 		userGetRole.callsArgWith(1, null, 'role-info');
 		var middleware = identify(authority);
