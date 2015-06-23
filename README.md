@@ -17,21 +17,30 @@ $ npm install auth-rbac
 
 ```js
 var authRbac = require('auth-rbac');
+var express = require('express');
 
 var User = require('./models/user');
 var Role = require('./models/role');
 
 var auth = authRbac({
-	getUser: (req, cb) => cb(null, req.user),
-	userGetRole: (user, cb) => Role.findById(user.role, cb),
-	roleHasPrivilege: (role, priv, cb) => cb(null, role.privileges.indexOf(priv) !== -1)
+	getUser: function(req, cb) {
+		cb(null, req.user);
+	},
+	
+	userGetRole: function(user, cb) {
+		Role.findById(user.role, cb);
+	},
+	
+	roleHasPrivilege: function(role, priv, cb) {
+		cb(null, role.privileges.indexOf(priv) !== -1);
+	},
 });
 
-var express = require('express');
 var app = express();
-
 app.use(authRbac.identify(auth));
-app.get('/users', authRbac.requirePrivilege('user:enum'), function(req, res) {
-	return res.sendStatus(200);
-});
+app.get('/users',
+	authRbac.requirePrivilege('user:enum')
+	function(req, res) {
+		return res.sendStatus(200);
+	});
 ```
