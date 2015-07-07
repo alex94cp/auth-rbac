@@ -24,14 +24,14 @@
   "homepage": "https://github.com/alex94puchades/auth-rbac#readme",
   "devDependencies": {
     "mocha": "~2.2.5",
-    "chai": "^2.3.0",
-    "sinon": "^1.14.1",
-    "sinon-chai": "^2.7.0",
-    "istanbul": "^0.3.14",
+    "chai": "^3.0.0",
+    "sinon": "^1.15.4",
+    "sinon-chai": "^2.8.0",
+    "istanbul": "^0.3.17",
     "coveralls": "^2.11.2",
     "node-mocks-http": "~1.4.3"
   },
   "dependencies": {
-    "lodash": "~3.9.3"
+    "lodash": "~3.10.0"
   }
 }
