@@ -1,6 +1,6 @@
 {
   "name": "auth-rbac",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "description": "RBAC-based authorization library for node",
   "main": "index.js",
   "scripts": {
