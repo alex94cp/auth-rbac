@@ -21,8 +21,8 @@ describe('User', function() {
 			var user = new User({ userGetRole: userGetRole }, 'user-info');
 			user.getRole(function(err, role) {
 				expect(err).to.not.exist;
-				expect(role).to.be.an.instanceof(Role)
-				            .and.to.have.property('info', 'role-info');
+				expect(role).to.be.an.instanceof(Role);
+				expect(role).to.have.property('info', 'role-info');
 				expect(userGetRole).to.have.been.calledWith('user-info');
 			});
 		});

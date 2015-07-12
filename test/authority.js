@@ -29,8 +29,8 @@ describe('Authority', function() {
 			var request = httpMocks.createRequest();
 			authority.getUser(request, function(err, user) {
 				expect(err).to.not.exist;
-				expect(user).to.be.an.instanceof(User)
-				            .and.have.property('info', 'user-info');
+				expect(user).to.be.an.instanceof(User);
+				expect(user).to.have.property('info', 'user-info');
 				expect(getUser).to.have.been.calledWith(request);
 			});
 		});
