@@ -103,7 +103,24 @@ describe('requirePrivilege', function() {
 		});
 	});
 	
-	it('propagates roleHasPrivilege errors', function() {
+	it('propagates roleHasPrivilege sync errors', function() {
+		roleHasPrivilege.returns(new Error);
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		var middleware = requirePrivilege('priv-name', {
+			onAccessGranted: onAccessGranted,
+			onAccessDenied: onAccessDenied
+		});
+		identifyMiddleware(request, response, assertNoError);
+		middleware(request, response, function(err) {
+			expect(err).to.exist;
+			expect(onAccessGranted).to.not.have.been.called;
+			expect(onAccessDenied).to.not.have.been.called;
+			expect(roleHasPrivilege).to.have.been.called;
+		});
+	});
+	
+	it('propagates roleHasPrivilege async errors', function() {
 		roleHasPrivilege.callsArgWith(2, new Error);
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
