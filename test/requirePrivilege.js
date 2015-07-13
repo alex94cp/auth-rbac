@@ -19,6 +19,7 @@ function assertNoError(err) {
 };
 
 describe('requirePrivilege', function() {
+	var getUser, userGetRole, roleHasPrivilege;
 	var identifyMiddleware, onAccessGranted, onAccessDenied;
 	before(function() {
 		getUser = sinon.stub().callsArgWith(1, null, 'user-info');
@@ -30,8 +31,8 @@ describe('requirePrivilege', function() {
 			roleHasPrivilege: roleHasPrivilege
 		});
 		identifyMiddleware = identify(authority);
-		onAccessGranted = sinon.spy();
-		onAccessDenied = sinon.spy();
+		onAccessGranted = sinon.stub().callsArg(2);
+		onAccessDenied = sinon.stub().callsArg(2);
 	});
 	
 	beforeEach(function() {
@@ -40,6 +41,18 @@ describe('requirePrivilege', function() {
 		roleHasPrivilege.reset();
 		onAccessGranted.reset();
 		onAccessDenied.reset();
+	});
+	
+	it('invokes next if roleHasPrivilege gives true', function(done) {
+		roleHasPrivilege.callsArgWith(2, null, true);
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		identifyMiddleware(request, response, assertNoError);
+		requirePrivilege('priv-name')(request, response, function(err) {
+			expect(err).to.not.exist;
+			expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+			done();
+		});
 	});
 	
 	it('throws an error if request does not have auth info', function() {
@@ -57,13 +70,10 @@ describe('requirePrivilege', function() {
 	it('throws an error if user has no identified role', function() {
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
-		request.auth = { user: 'user', role: null };
-		var middleware = requirePrivilege('priv-name', {
-			onAccessGranted: onAccessGranted,
-			onAccessDenied: onAccessDenied
-		});
+		identifyMiddleware(request, response, assertNoError);
+		request.auth.role = null;
 		expect(function() {
-			middleware(request, response, assertNoError);
+			requirePrivilege('priv-name')(request, response, assertNoError);
 		}).to.throw(Error);
 	});
 	
@@ -95,20 +105,6 @@ describe('requirePrivilege', function() {
 		middleware(request, response, assertNoError);
 		expect(onAccessGranted).to.not.have.been.called;
 		expect(onAccessDenied).to.have.been.called;
-		expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
-	});
-	
-	it('gives onAccessDenied error if roleHasPrivilege gives false', function() {
-		roleHasPrivilege.callsArgWith(2, null, false);
-		var request = httpMocks.createRequest();
-		var response = httpMocks.createResponse();
-		var middleware = requirePrivilege('priv-name', {
-			onAccessGranted: onAccessGranted,
-			onAccessDenied: new Error,
-		});
-		identifyMiddleware(request, response, assertNoError);
-		middleware(request, response, assertError);
-		expect(onAccessGranted).to.not.have.been.called;
 		expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 	});
 	
