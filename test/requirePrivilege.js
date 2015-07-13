@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var chai = require('chai');
 var sinon = require('sinon');
 var httpMocks = require('node-mocks-http');
@@ -8,6 +9,10 @@ chai.use(require('sinon-chai'));
 var Authority = require('../lib/authority');
 var identify = require('../lib/middleware/identify');
 var requirePrivilege = require('../lib/middleware/requirePrivilege');
+
+function assertError(err) {
+	expect(err).to.exist;
+}
 
 function assertNoError(err) {
 	expect(err).to.not.exist;
@@ -49,7 +54,20 @@ describe('requirePrivilege', function() {
 		}).to.throw(Error);
 	});
 	
-	it('calls onAccessGranted if roleHasPrivilege gives true', function() {
+	it('throws an error if user has no identified role', function() {
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		request.auth = { user: 'user', role: null };
+		var middleware = requirePrivilege('priv-name', {
+			onAccessGranted: onAccessGranted,
+			onAccessDenied: onAccessDenied
+		});
+		expect(function() {
+			middleware(request, response, assertNoError);
+		}).to.throw(Error);
+	});
+	
+	it('invokes onAccessGranted callback if roleHasPrivilege gives true', function() {
 		roleHasPrivilege.callsArgWith(2, null, true);
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
@@ -59,15 +77,13 @@ describe('requirePrivilege', function() {
 			onAccessDenied: onAccessDenied
 		});
 		identifyMiddleware(request, response, assertNoError);
-		middleware(request, response, function(err) {
-			expect(err).to.not.exist;
-			expect(onAccessGranted).to.have.been.called;
-			expect(onAccessDenied).to.not.have.been.called;
-			expect(roleHasPrivilege).to.have.been.calledWith(null, 'role-info', 'priv-name');
-		});
+		middleware(request, response, assertNoError);
+		expect(onAccessGranted).to.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 	});
 	
-	it('calls onAccessDenied if roleHasPrivilege gives false', function() {
+	it('invokes onAccessDenied callback if roleHasPrivilege gives false', function() {
 		roleHasPrivilege.callsArgWith(2, null, false);
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
@@ -76,51 +92,125 @@ describe('requirePrivilege', function() {
 			onAccessDenied: onAccessDenied
 		});
 		identifyMiddleware(request, response, assertNoError);
-		middleware(request, response, function(err) {
-			expect(err).to.not.exist;
-			expect(onAccessGranted).to.not.have.been.called;
-			expect(onAccessDenied).to.have.been.called;
-			expect(roleHasPrivilege).to.have.been.calledWith(null, 'role-info', 'priv-name');
-		});
+		middleware(request, response, assertNoError);
+		expect(onAccessGranted).to.not.have.been.called;
+		expect(onAccessDenied).to.have.been.called;
+		expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
 	});
 	
-	it('invokes privilege callback and requires returned privilege', function() {
+	it('gives onAccessDenied error if roleHasPrivilege gives false', function() {
+		roleHasPrivilege.callsArgWith(2, null, false);
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		var middleware = requirePrivilege('priv-name', {
+			onAccessGranted: onAccessGranted,
+			onAccessDenied: new Error,
+		});
+		identifyMiddleware(request, response, assertNoError);
+		middleware(request, response, assertError);
+		expect(onAccessGranted).to.not.have.been.called;
+		expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+	});
+	
+	it('invokes privilege sync callback and requires returned privilege', function() {
 		roleHasPrivilege.callsArgWith(2, null, true);
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
-		var callback = sinon.stub().returns('priv-name');
+		var expected = 'priv-name';
+		var callback = function(req) { return expected; };
 		var middleware = requirePrivilege(callback, {
 			onAccessGranted: onAccessGranted,
 			onAccessDenied: onAccessDenied
 		});
 		identifyMiddleware(request, response, assertNoError);
-		middleware(request, response, function(err) {
-			expect(err).to.not.exist;
-			expect(onAccessGranted).to.have.been.called;
-			expect(onAccessDenied).to.not.have.been.called;
-			expect(callback).to.have.been.calledWith(request);
-			expect(roleHasPrivilege).to.have.been.calledWith(null, 'role-info', 'priv-name');
-		});
+		middleware(request, response, assertNoError);
+		expect(onAccessGranted).to.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(roleHasPrivilege).to.have.been.calledWith('role-info', expected);
 	});
 	
-	it('propagates roleHasPrivilege sync errors', function() {
-		roleHasPrivilege.returns(new Error);
+	it('invokes privilege sync callback and grants access if it returns false', function() {
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
-		var middleware = requirePrivilege('priv-name', {
+		var callback = function(req) { return false; };
+		var middleware = requirePrivilege(callback, {
 			onAccessGranted: onAccessGranted,
 			onAccessDenied: onAccessDenied
 		});
 		identifyMiddleware(request, response, assertNoError);
-		middleware(request, response, function(err) {
-			expect(err).to.exist;
-			expect(onAccessGranted).to.not.have.been.called;
-			expect(onAccessDenied).to.not.have.been.called;
-			expect(roleHasPrivilege).to.have.been.called;
-		});
+		middleware(request, response, assertNoError);
+		expect(onAccessGranted).to.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(roleHasPrivilege).to.not.have.been.called;
 	});
 	
-	it('propagates roleHasPrivilege async errors', function() {
+	it('propagates privilege sync callback returned errors', function() {
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		var callback = function(req) { return new Error };
+		var middleware = requirePrivilege(callback, {
+			onAccessGranted: onAccessGranted,
+			onAccessDenied: onAccessDenied
+		});
+		identifyMiddleware(request, response, assertNoError);
+		middleware(request, response, assertError);
+		expect(onAccessGranted).to.not.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(roleHasPrivilege).to.not.have.been.called;
+	});
+	
+	it('invokes privilege async callback and requires returned privilege', function() {
+		roleHasPrivilege.callsArgWith(2, null, true);
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		var callback = sinon.stub().callsArgWith(1, null, 'priv-name');
+		var middleware = requirePrivilege(callback, {
+			onAccessGranted: onAccessGranted,
+			onAccessDenied: onAccessDenied
+		});
+		identifyMiddleware(request, response, assertNoError);
+		middleware(request, response, assertNoError);
+		expect(onAccessGranted).to.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(callback).to.have.been.calledWith(request);
+		expect(roleHasPrivilege).to.have.been.calledWith('role-info', 'priv-name');
+	});
+	
+	it('invokes privilege async callback and grants access if it returns false', function() {
+		roleHasPrivilege.callsArgWith(2, null, true);
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		var callback = sinon.stub().callsArgWith(1, null, false);
+		var middleware = requirePrivilege(callback, {
+			onAccessGranted: onAccessGranted,
+			onAccessDenied: onAccessDenied
+		});
+		identifyMiddleware(request, response, assertNoError);
+		middleware(request, response, assertNoError);
+		expect(onAccessGranted).to.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(callback).to.have.been.calledWith(request);
+		expect(roleHasPrivilege).to.not.have.been.called;
+	});
+	
+	it('propagates privilege async callback returned errors', function() {
+		roleHasPrivilege.callsArgWith(2, null, true);
+		var request = httpMocks.createRequest();
+		var response = httpMocks.createResponse();
+		var callback = sinon.stub().callsArgWith(1, new Error);
+		var middleware = requirePrivilege(callback, {
+			onAccessGranted: onAccessGranted,
+			onAccessDenied: onAccessDenied
+		});
+		identifyMiddleware(request, response, assertNoError);
+		middleware(request, response, assertError);
+		expect(onAccessGranted).to.not.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(callback).to.have.been.calledWith(request);
+		expect(roleHasPrivilege).to.not.have.been.called;
+	});
+	
+	it('propagates roleHasPrivilege errors', function() {
 		roleHasPrivilege.callsArgWith(2, new Error);
 		var request = httpMocks.createRequest();
 		var response = httpMocks.createResponse();
@@ -129,11 +219,9 @@ describe('requirePrivilege', function() {
 			onAccessDenied: onAccessDenied
 		});
 		identifyMiddleware(request, response, assertNoError);
-		middleware(request, response, function(err) {
-			expect(err).to.exist;
-			expect(onAccessGranted).to.not.have.been.called;
-			expect(onAccessDenied).to.not.have.been.called;
-			expect(roleHasPrivilege).to.have.been.called;
-		});
+		middleware(request, response, assertError);
+		expect(onAccessGranted).to.not.have.been.called;
+		expect(onAccessDenied).to.not.have.been.called;
+		expect(roleHasPrivilege).to.have.been.called;
 	});
 });
